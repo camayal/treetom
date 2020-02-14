@@ -239,13 +239,14 @@ cursor:pointer;
 	      <div id="author"><a href="https://camayal.info">Carlos Alonso Maya-Lastra</a> - 2020</div>
           
           <div>
-            <span>Newick tree</span>
-<textarea id="newickSource">
+            <span>Newick tree</span> 
+
+<textarea id="newickSource" placeholder="Enter newick tree or drag a drop a newick file from your computer">
 </textarea>
           </div>
           <div>
             <span>Coordinates CSV format (No headers) - columns: name, lat, lng [optional: <a target=”_blank” href="https://en.wikipedia.org/wiki/Web_colors">webNameColor</a>]</span>
-<textarea id="csvSource">
+<textarea id="csvSource" placeholder="Enter CSV files with name, lat and long or drag a drop a CSV file from your computer">
 </textarea>
           </div>
       
@@ -1066,6 +1067,69 @@ document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor(
 //     console.log("test")
 //   })
 // })
+
+
+//Drag and drop controlers from 
+var dropZones = [document.getElementById('newickSource'), document.getElementById('csvSource')];
+ 
+for (ele in dropZones){
+dropZones[ele].addEventListener('dragover', dragOver);
+dropZones[ele].addEventListener('dragend', dragEnd);
+dropZones[ele].addEventListener('drop', readText, false);
+}
+
+
+function dragOver(e) {
+    e.srcElement.value = "Drop here" 
+    return false;
+}
+
+function dragOver(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+    return false;
+}
+ 
+function dragEnd(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+    return false;
+}
+ 
+//Read file to put into the text area
+function readText(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+ 
+    var file,
+        fileData,
+        fileReader,
+        files = e.dataTransfer.files;
+ 
+    if (!files) {
+        return;
+    }
+ 
+    //Clean textarea
+    e.srcElement.value = '';
+ 
+    //Just read first file in case user select more than one file
+    file = files[0];
+
+    //new instance for each file
+    fileReader = new FileReader();
+    fileReader.textArea = e.srcElement;
+
+    fileData = function (event) {
+        this.textArea.value += this.result
+    };
+
+    fileReader.addEventListener('loadend',fileData);
+    fileReader.readAsText(file);
+
+}
+
+
 
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

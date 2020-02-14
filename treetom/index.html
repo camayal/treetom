@@ -87,7 +87,11 @@
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
+<<<<<<< HEAD
   padding-top: 6vh; /* Location of the box */
+=======
+  padding-top: 5vh; /* Location of the box */
+>>>>>>> 920e107bbc4874e08ff9db4dff93e1bb59646f2b
   left: 0;
   top: 0;
   width: 100%; /* Full width */
@@ -158,6 +162,10 @@ cursor:pointer;
   font-style: italic;
 }
 
+.twitter-follow-button{
+    float: right;
+}
+
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
@@ -221,7 +229,8 @@ cursor:pointer;
 
     <!-- Modal content -->
     <div class="modal-content">
-      <div id="title" class="ascii-art">
+        <a href="https://twitter.com/camayal_?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @camayal_</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <div id="title" class="ascii-art">
    ╔╦╗┬─┐┌─┐┌─┐╔╦╗┌─┐╔╦╗
     ║ ├┬┘├┤ ├┤  ║ │ │║║║
     ╩ ┴└─└─┘└─┘ ╩ └─┘╩ ╩
@@ -231,7 +240,7 @@ cursor:pointer;
       <div class="textAreaColumn">
         <div>Simple tool for visualizing phylogenetic trees onto a map</div>
         
-        <div id="author">Carlos Alonso Maya-Lastra - 2020</div>
+	      <div id="author"><a href="https://camayal.info">Carlos Alonso Maya-Lastra</a> - 2020</div>
           
           <div>
             <span>Newick tree</span>
@@ -264,7 +273,6 @@ cursor:pointer;
     </div>
   
   </div>
-
 
 
   
@@ -1064,7 +1072,13 @@ document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor(
 // })
 
 
-
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-56235798-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
 
 </script>
 </body>

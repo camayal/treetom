@@ -429,7 +429,7 @@ for ( var i=0; i < markersJSONString.length; ++i )
       .addTo(window.fg);
 }
 }
-catch{
+catch(error){
   console.log("Error: drawMarkers failed")
 }
 }
@@ -499,7 +499,7 @@ setTimeout(function () {
   markIncomplete()
 }, 1000);
 }
-catch{
+catch(error){
   console.log("Error: centerView failed")
 }
 }
@@ -596,7 +596,7 @@ function csv2json(csv){
   // return JSON.stringify(result); //JSON
   return result
   }
-  catch{
+  catch(error){
     console.log("Error: cvs2json failed")
   }
 }
@@ -1129,8 +1129,7 @@ function readText(e) {
 
 }
 
-
-
+	 
 
 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

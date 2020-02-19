@@ -17,9 +17,10 @@
       margin-left: 30%;
     }
 
+    
 
     #svg { 
-      position: absolute; 
+      position:absolute; 
       top: 0px;
       left: 0px;
       width: 28%; 
@@ -764,7 +765,10 @@ function redrawTree(){
 window.addEventListener("resize", redrawTree);
 
 
-window.addEventListener('beforeprint', redrawTree)
+window.addEventListener('beforeprint', function(){
+  switchVisibilityElements(false);
+  redrawTree()
+})
 
 
 
@@ -1167,8 +1171,7 @@ document.getElementById("btnBack").addEventListener('click', openModal);
 document.getElementById("btnBack").addEventListener('contextmenu', function(ev) {
     ev.preventDefault();
     switchVisibilityElements(false)
-
-    setTimeout(switchVisibilityElements, 30000, true)
+    
 }, false);
 
 
@@ -1176,7 +1179,7 @@ document.getElementById("btnBack").addEventListener('contextmenu', function(ev) 
 
 
 // Hide controls and shadows or back to default state
-function switchVisibilityElements(isVisible){
+function switchVisibilityElements(isVisible, time=30000){
     document.getElementById("btnBack").hidden = !isVisible;
     document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
     document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
@@ -1184,6 +1187,7 @@ function switchVisibilityElements(isVisible){
     if (!isVisible){
       document.getElementById("nameApp").style.textShadow = "none"; 
       document.getElementById("nameApp").style.fontWeight = "bold"
+      setTimeout(switchVisibilityElements, time, true)
     }
       else{
       document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor() + ", 0 0.5px " + randomColor() + ", 0.5px 0 " + randomColor() + ", 0 -0.5px " + randomColor(); 

@@ -9,6 +9,8 @@
 
   <style>
 
+
+
     #mapid { 
       height: 100%;
       width: 70%;
@@ -623,7 +625,7 @@ function getFeaturesInView() {
 // Call draw lines and mark those are not matching
 function drawLines_MapPerspective(){
   // try{
-  // Clear svg object (maybe check a fifferent solution than jquary)
+  // Clear svg object (maybe check a fifferent solution than jquery)
   $("#linesContainer").empty();
 
   var leaves = inScreenLeaves()
@@ -735,12 +737,36 @@ function closeModal(){
     document.getElementById("myModal").style.display = "none";
     drawMap(); 
     drawMarkers(); 
-    drawTree(); 
+    drawTree();
     centerView();
+    
   }else{
     window.alert("Nothing to show, enter newick tree and csv formated lat-long information to continue");
   }
 }
+
+
+// Control reprinting tree useful for resizing
+function redrawTree(){
+  if(document.getElementById("myModal").style.display == "none"){
+    drawTree()
+    // drawLines_MapPerspective()
+    // markIncomplete()
+    setTimeout(function () {
+      drawLines_MapPerspective()
+      markIncomplete()
+    }, 1000);
+    
+}
+}
+
+//Listener for resizing screen
+window.addEventListener("resize", redrawTree);
+
+
+window.addEventListener('beforeprint', redrawTree)
+
+
 
 //Examples
 function example(num){

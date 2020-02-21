@@ -46,6 +46,7 @@
       pointer-events: none;
     }
 
+
     #linesContainer{
       position: absolute;
       top: 0px;
@@ -80,10 +81,12 @@
     .textAreaColumn div textarea{
         box-sizing: border-box;
         width:100%;
-        height: 25%;
+        height: 25vh;
         resize: none;
     }
-
+    #xyzURL{
+      display:none;
+    }
 
     /* The Modal (background) */
 .modal {
@@ -107,6 +110,7 @@
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
+  
 }
 
 .ascii-art {
@@ -156,7 +160,8 @@ button:active {
 cursor:pointer;
 }
 
-#exampleDescription, #author{
+
+#exampleDescription, #author, #personalizedMapPrompt{
   font-weight: normal;
   font-style: italic;
 }
@@ -251,10 +256,13 @@ cursor:pointer;
           </div>
           <div>
             <span>Coordinates CSV format (No headers) - columns: name, lat, lng [optional: <a target=”_blank” href="https://en.wikipedia.org/wiki/Web_colors">webNameColor</a>]</span>
+            
 <textarea id="csvSource" placeholder="Enter CSV files with name, lat and long or drag a drop a CSV file from your computer">
 </textarea>
-          </div>
-      
+<span id="personalizedMapPrompt">Do you have your own XYZ map (i.e. Google Earth engine maps)? <a class="link" onclick="addXYZcontainer()">Click here</a></span>
+<input type="text" id="xyzURL" placeholder="For example: http://earthengine.google.org/static/hansen_2013/loss/{z}/{x}/{y}.png" value="" autocomplete="off">
+</div>
+
       
           <div>
 <span>Test:
@@ -314,45 +322,50 @@ function drawMap(){
   // }).addTo(window.map);
 
 
-  // Define all possible layers in ESRI plugin
-var   topographic = L.esri.basemapLayer("Topographic"),
-      streets = L.esri.basemapLayer("Streets"),
-      nationalGeographic = L.esri.basemapLayer("NationalGeographic"),
-      oceans = L.esri.basemapLayer("Oceans"),
-      gray = L.esri.basemapLayer("Gray"),
-      darkGray = L.esri.basemapLayer("DarkGray"),
-      imagery = L.esri.basemapLayer("Imagery"),
-      imageryClarity = L.esri.basemapLayer("ImageryClarity"),
-      imageryFirefly = L.esri.basemapLayer("ImageryFirefly"),
-      shadedRelief = L.esri.basemapLayer("ShadedRelief"),
-      terrain = L.esri.basemapLayer("Terrain");
-
 
 // Set map with topographic as default
 window.map = L.map('mapid', {
-    layers: [topographic],
+    layers: [L.esri.basemapLayer("Topographic")],
     zoomControl: false,
 
 });
 
 // Object with info for control layers
 var baseMaps = {
-  "Topographic": topographic,
-  "Streets": streets,
-  "National Geographic": nationalGeographic,
-  "Oceans": oceans,
-  "Gray": gray,
-  "DarkGray": darkGray,
-  "Imagery": imagery,
-  "Imagery (Clarity)": imageryClarity,
-  "Imagery (Firefly)": imageryFirefly,
-  "Shaded relief": shadedRelief,
-  "Terrain": terrain,
+  "Topographic": L.esri.basemapLayer("Topographic"),
+  "Streets": L.esri.basemapLayer("Streets"),
+  "National Geographic": L.esri.basemapLayer("NationalGeographic"),
+  "Oceans": L.esri.basemapLayer("Oceans"),
+  "Gray": L.esri.basemapLayer("Gray"),
+  "Dark Gray": L.esri.basemapLayer("DarkGray"),
+  "Imagery": L.esri.basemapLayer("Imagery"),
+  "Imagery (Clarity)": L.esri.basemapLayer("ImageryClarity"),
+  "Imagery (Firefly)": L.esri.basemapLayer("ImageryFirefly"),
+  "Shaded relief": L.esri.basemapLayer("ShadedRelief"),
+  "Terrain": L.esri.basemapLayer("Terrain"),
+  // "Gain": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png'),
 };
+
+var overlays = {
+"Oceans labels": L.esri.basemapLayer('OceansLabels'),
+"Dark Gray labels": L.esri.basemapLayer('DarkGrayLabels'),
+"Imagery labels": L.esri.basemapLayer('ImageryLabels'),
+"Shaded relief labels": L.esri.basemapLayer('ShadedReliefLabels'),
+"Terrain labels": L.esri.basemapLayer('TerrainLabels'),
+
+//   "Personalized map": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png')
+}
+
+if (document.getElementById("xyzURL").value){
+  overlays["Personalized layer"] = L.tileLayer(document.getElementById("xyzURL").value).addTo(window.map)
+  // overlays["Personalized layer"].addTo(map);
+}
+
+
 
 
 // Add control for layers
-L.control.layers(baseMaps).addTo(window.map);
+L.control.layers(baseMaps, overlays).addTo(window.map);
 
 
 // Add controls in another position
@@ -361,7 +374,8 @@ L.control.zoom({
 }).addTo(window.map);
 
 
-
+// Add scale to map
+L.control.scale({metric:true, imperial:false}).addTo(window.map)
 
 
 
@@ -1176,6 +1190,16 @@ document.getElementById("btnBack").addEventListener('contextmenu', function(ev) 
 
 
 
+//add container to put url with XYZ maps
+function addXYZcontainer(){
+document.getElementById("personalizedMapPrompt").innerText = "XYZ url"
+document.getElementById("personalizedMapPrompt").style.paddingTop = "1em"
+document.getElementById("personalizedMapPrompt").style.fontStyle = "normal"
+document.getElementById("personalizedMapPrompt").style.fontWeight = "bold"
+document.getElementById("xyzURL").style.display = "block"
+document.getElementById("xyzURL").style.width = "100%"
+
+}
 
 
 // Hide controls and shadows or back to default state

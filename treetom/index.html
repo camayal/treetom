@@ -259,7 +259,7 @@ cursor:pointer;
             
 <textarea id="csvSource" placeholder="Enter CSV files with name, lat and long or drag a drop a CSV file from your computer">
 </textarea>
-<span id="personalizedMapPrompt">Do you have your own XYZ map (i.e. Google Earth engine maps)? <a class="link" onclick="addXYZcontainer()">Click here</a></span>
+<span id="personalizedMapPrompt">Do you have your own tiled web or XYZ map (i.e. Google Earth engine maps)? <a class="link" onclick="addXYZcontainer()">Click here</a></span>
 <input type="text" id="xyzURL" placeholder="For example: http://earthengine.google.org/static/hansen_2013/loss/{z}/{x}/{y}.png" value="" autocomplete="off">
 </div>
 
@@ -1193,7 +1193,7 @@ document.getElementById("btnBack").addEventListener('contextmenu', function(ev) 
 
 //add container to put url with XYZ maps
 function addXYZcontainer(){
-document.getElementById("personalizedMapPrompt").innerText = "XYZ url"
+document.getElementById("personalizedMapPrompt").innerText = "Tiled web map or XYZ url"
 document.getElementById("personalizedMapPrompt").style.paddingTop = "1em"
 document.getElementById("personalizedMapPrompt").style.fontStyle = "normal"
 document.getElementById("personalizedMapPrompt").style.fontWeight = "bold"

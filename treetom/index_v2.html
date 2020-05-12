@@ -1,0 +1,1678 @@
+<html>
+<head>
+  <title>TreeToM - Simple tool for visualizing phylogenetic trees onto a map</title>
+  <meta charset="utf-8"/>
+  <link href="/img/favicon.ico?v=m229mLN9lM" rel="shortcut icon">
+  <meta content="Simple tool to show phylogenetic trees onto maps for non-coders and stress free" name="description">
+  <meta content="phylogeny, newick, phylogenetics, map, phylogeography" name="keywords">
+  <meta content="Carlos Alonso Maya Lastra" name="author">
+
+  <style>
+
+
+
+    #mapid { 
+      height: 100%;
+      width: 70%;
+      margin-left: 30%;
+    }
+
+    
+
+    #svg { 
+      position:absolute; 
+      top: 0px;
+      left: 0px;
+      width: 28%; 
+      height: 96.5%; 
+      margin-top: 0.7%;
+      background-color: transparent; 
+      /* border: 3px solid #fdc0b6; */
+    }
+
+    #attributionPhylotree {
+      position: fixed; 
+      background: rgba(255, 255, 255, 0.7);
+      bottom: 0.7%;
+      left: 0;
+      font-size: 0.8em;
+      font: 0.8em "Helvetica Neue", Arial, Helvetica, sans-serif;
+      padding: 0 5px;
+      visibility: hidden;
+    }
+
+    /* remove hovering effect in branches */
+    .branch {
+      pointer-events: none;
+    }
+
+
+    #linesContainer{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      z-index: 1000;
+      background-color: transparent;
+      pointer-events: none; 
+      
+    }
+
+    .dropdown-menu {
+      z-index: 20000;
+    }
+
+
+    .textAreaColumn{
+    width:80%;   
+    margin: auto;
+    }
+
+    .textAreaColumn div{
+        width:100%;
+        padding-top: 1em;
+        box-sizing: border-box;
+    }
+
+    .textAreaColumn div span{
+        display:block;
+        font-weight: bold;
+    }
+
+    .textAreaColumn div textarea{
+        box-sizing: border-box;
+        width:100%;
+        height: 20vh;
+        resize: none;
+    }
+    #xyzURL{
+      display:none;
+    }
+
+    #authorForm input{
+      width:100%;
+    }
+
+
+    #shareURL{
+ width:100%;
+ height:32px;
+ line-height:32px;
+ color:rgb(0, 0, 0);
+ background-color:#fff;
+ border:1px solid rgb(201, 201, 201);
+ border-radius:3px;
+ padding:3px;
+ box-shadow: 0 0 1px rgba(0,0,0,0.65);
+}
+
+
+
+
+    /* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 5vh; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 2.5vh;
+  border: 1px solid #888;
+  width: 80%;
+  height: 90vh; /* Full height */
+  overflow: auto;
+}
+
+.modal-share{
+  height: 75vh; 
+}
+
+#shareInfo{
+      display:none;
+}
+
+label{
+  font-weight: normal !important;
+  margin: 0px !important;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ascii-art {
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1.15em;
+}
+
+
+
+button {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+	background-color:#ffffff;
+	border-radius:4px;
+	border:1px solid #b0adb0;
+	display:inline-block;
+	cursor:pointer;
+	color:#000000;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:15px;
+	/* font-weight:bold; */
+	padding:6px 20px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+button:hover {
+	background:linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+	background-color:#f6f6f6;
+}
+button:active {
+	/* position:relative; */
+	top:1px;
+  outline: none;
+}
+
+#btnOnMapContainer{
+  visibility: hidden;
+  z-index: 99999;
+  margin-left: 30.5%;
+  margin-top: 0.5%;
+  position:absolute;
+}
+
+
+.btnOnMap{
+  box-shadow: 0 0 1px rgba(0,0,0,0.65);
+  border:1px solid #ccc;
+}
+
+.link{
+cursor:pointer;
+}
+
+.alertMsg{
+  color:#f73030;
+}
+
+
+#authorInformation{
+  background: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  /* padding: 5px; */
+  /* font-weight: bold; */
+}
+
+
+#exampleDescription, #author, #personalizedMapPrompt{
+  font-weight: normal;
+  font-style: italic;
+}
+
+.twitter-follow-button{
+    float: right;
+}
+
+
+
+
+  </style>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+
+
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+
+
+
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="phylotree.css">
+
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <!-- <script src="//d3js.org/d3.v3.min.js"></script> -->
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
+  <script type='text/javascript' src='phylotree.js'></script>
+  
+
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
+    integrity="sha512-cMQ5e58BDuu1pr9BQ/eGRn6HaR6Olh0ofcHFWe5XesdCITVuSBiBZZbhCijBe5ya238f/zMMRYIMIIg1jxv4sQ=="
+    crossorigin=""></script>
+
+
+    
+    
+    
+</head>
+
+<body onload="loadWebsite()">
+
+<!-- tree -->
+    <div id="treeContainer">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <g id="viewport">
+        </g>
+    </svg>
+    <div id="attributionPhylotree"><span id="nameApp">TreeToM</span> plotting is powered by <a href="https://github.com/veg/phylotree.js">phylotree.js</a></div>
+</div>
+
+
+<!-- map -->
+    <div id="btnOnMapContainer">
+      <button class="btnOnMap" id="btnBack" name="btnBack">Back</button>
+      <button class="btnOnMap" id="btnShare" name="btnShare">Share</button>
+      <span id="authorInformation"></span>
+    </div>
+      <div id="mapid">
+      </div>
+
+
+<!-- svg for lines -->
+      <svg id="linesContainer" height="100%" width="100%"></svg> 
+
+
+
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <a href="https://twitter.com/camayal_?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @camayal_</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <div id="title" class="ascii-art">
+   ╔╦╗┬─┐┌─┐┌─┐╔╦╗┌─┐╔╦╗
+    ║ ├┬┘├┤ ├┤  ║ │ │║║║
+    ╩ ┴└─└─┘└─┘ ╩ └─┘╩ ╩
+      </div>
+      
+      
+      <div class="textAreaColumn">
+        <div>Simple tool for visualizing phylogenetic trees onto a map</div>
+        
+	      <div id="author"><a href="https://camayal.info">Carlos Alonso Maya-Lastra</a> - 2020</div>
+          
+          <div>
+            <span>Newick tree</span> 
+
+<textarea id="newickSource" placeholder="Enter newick tree or drag a drop a newick file from your computer">
+</textarea>
+          </div>
+          <div>
+            <span>Coordinates CSV format (No headers) - columns: name, lat, lng [optional: <a target=”_blank” href="https://en.wikipedia.org/wiki/Web_colors">webNameColor</a>]</span>
+            
+<textarea id="csvSource" placeholder="Enter CSV files with name, lat and long or drag a drop a CSV file from your computer">
+</textarea>
+<span id="personalizedMapPrompt">Do you have your own tiled web map [a.k.a. XYZ map] (i.e. Google Earth engine maps)? <a class="link" onclick="addXYZcontainer()">Click here</a></span>
+<input type="text" id="xyzURL" placeholder="For example: http://earthengine.google.org/static/hansen_2013/loss/{z}/{x}/{y}.png" value="" autocomplete="off">
+</div>
+
+      
+          <div>
+<span>Test:
+<a id="ex1" class="link" onclick="example(1);" title="Simple example">example 1</a>, 
+<a id="ex2" class="link" onclick="example(2);" title="Simple example showing all different colors formats">example 2</a>, 
+<a id="ex3" class="link" onclick="example(3);" title="Simple example with multiple markers per tip in the tree">example 3</a>, 
+<a id="ex4" class="link" onclick="example(4);" title="Example of rooted newick file, Cnidoscolus data from Maya-Lastra & Steinmann, 2019">example 4</a>, 
+<a id="ex5" class="link" onclick="example(5);" title="Example with CSV without perfect match with tree tips, E. polycarpa data from Maya-Lastra & Steinmann, 2017">example 5</a>, 
+<a id="ex6" class="link" onclick="example(6);" title="All features example, inital hypothesis of E. polycarpa relationships from Maya-Lastra & Steinmann, 2017">example 6</a>
+</span>
+<span id="exampleDescription"> </span>
+          </div>
+
+
+          <div>
+      <button id="btnTreeToMap" name="btnTreeToMap" onclick="closeModal()">Tree to map</button>
+         <br>
+         <br>
+    </div>
+    </div>
+  
+  </div>
+
+
+  
+  
+
+
+</div>
+
+<div id="shareModal" class="modal">
+  <div class="modal-content modal-share">
+    <span class="close">&times;</span>
+    <div id="sharedWarning" class="textAreaColumn">
+      <div>
+    <span class="alertMsg">Before sharing this tree and map (treemap) consider the following information:</span>
+    </div>
+      <span>
+        • Everyone with the URL may see this treemap<br>
+        • URL generated is a permanent URL, neither tree or coordinates associated with this can be modified<br>
+        • Removing URL is only allowed by email request (you must use the same email address provided below)<br><br>
+    </span>
+    <!-- <div>
+      <span>Authorship</span>
+    </div> -->
+    <div><span>You can provide some information about this data (you can leave empty all fields)</span></div>
+    <form id="authorForm">
+    <label for="authorship"> Lastname: </label>
+    <input type="text"  id="authorship" name="authorship" placeholder="e.g. Maya-Lastra" autocomplete="off" >
+    <label for="year"> Year: </label>
+    <input type="text"  id="year" name="year" placeholder="2017" autocomplete="off" >
+    <label for="doi"> DOI: </label>
+    <input type="url"  id="doi" name="doi" placeholder="DOI (URL format) associated with your publication, e.g. https://doi.org/10.3732/apps.1600035" autocomplete="off" onchange=testValidityForm(this)>
+    <label for="authorEmail"> Email address: </label>
+    <input type="email"  id="authorEmail" name="authorEmail" placeholder="" autocomplete="off" onchange=testValidityForm(this)>
+    </form>
+    <div>
+    <span>Do you want to share this treemap?</span>
+  </div>
+    <button id="btnShare" name="btnShare" onclick="preSaveData()">Generate URL to share</button>
+    <br><br>
+  </div>
+  <div id="shareInfo" class="textAreaColumn">
+    <div>
+    <span>Use the following link to share this treemap</span>
+  </div>
+  <div>
+    <input  type="text" id="shareURL" autocomplete="off" onClick="this.setSelectionRange(0, this.value.length)">
+  </div>
+  <div>
+    <button id="btnCopy" onclick="copyToClipboard(document.getElementById('shareURL').value)">Copy to clipboard</button>
+  </div>
+  </div>
+  </div>
+</div>
+
+
+<ul id="d3_layout_phylotree_context_menu" class="dropdown-menu" role="menu" style="display: none;"><il></il></ul>
+
+
+ <script>
+function testValidityForm(el){
+  if (el.validity.typeMismatch){
+    // document.getElementById('btnShare').disabled
+    console.log("bad type")
+    }
+}
+
+
+// Create object map and define controls of dragging map
+function drawMap(xyzurl){
+  //clean map in case it is
+  if (window.map != undefined) { 
+    map.remove(); 
+    $("#linesContainer").empty();
+  } 
+
+  // // var map = L.map('mapid',{zoomControl: false,}).setView([0, 0], 10);
+  // window.map = L.map('mapid',{zoomControl: false,});
+  // // Configure basemap using open access maps but with mapbox
+  // L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+  //     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+  //     maxZoom: 18,
+  //     id: 'mapbox/streets-v11',
+  //     // No for distribution?
+  //     accessToken: '',
+  // }).addTo(window.map);
+
+
+
+// Set map with topographic as default
+window.map = L.map('mapid', {
+    layers: [L.esri.basemapLayer("Topographic")],
+    zoomControl: false,
+
+});
+
+// Object with info for control layers
+var baseMaps = {
+  "Topographic": L.esri.basemapLayer("Topographic"),
+  "Streets": L.esri.basemapLayer("Streets"),
+  "National Geographic": L.esri.basemapLayer("NationalGeographic"),
+  "Oceans": L.esri.basemapLayer("Oceans"),
+  "Gray": L.esri.basemapLayer("Gray"),
+  "Dark Gray": L.esri.basemapLayer("DarkGray"),
+  "Imagery": L.esri.basemapLayer("Imagery"),
+  "Imagery (Clarity)": L.esri.basemapLayer("ImageryClarity"),
+  "Imagery (Firefly)": L.esri.basemapLayer("ImageryFirefly"),
+  "Shaded relief": L.esri.basemapLayer("ShadedRelief"),
+  "Terrain": L.esri.basemapLayer("Terrain"),
+  // "Gain": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png'),
+};
+
+var overlays = {
+"Oceans labels": L.esri.basemapLayer('OceansLabels'),
+"Gray labels": L.esri.basemapLayer('GrayLabels'),
+"Dark Gray labels": L.esri.basemapLayer('DarkGrayLabels'),
+"Imagery labels": L.esri.basemapLayer('ImageryLabels'),
+"Shaded relief labels": L.esri.basemapLayer('ShadedReliefLabels'),
+"Terrain labels": L.esri.basemapLayer('TerrainLabels'),
+
+//   "Personalized map": L.tileLayer('http://earthengine.google.org/static/hansen_2013/gain/{z}/{x}/{y}.png')
+}
+
+// if (document.getElementById("xyzURL").value){
+if (xyzurl){
+  overlays["Personalized layer"] = L.tileLayer(xyzurl).addTo(window.map)
+  // overlays["Personalized layer"].addTo(map);
+}
+
+
+
+
+// Add control for layers
+L.control.layers(baseMaps, overlays).addTo(window.map);
+
+
+// Add controls in another position
+L.control.zoom({
+    position: 'bottomright'
+}).addTo(window.map);
+
+
+// Add scale to map
+L.control.scale({metric:true, imperial:false, position: 'bottomleft'}).addTo(window.map)
+
+
+
+
+
+
+  // Add group of markers
+  window.fg = L.featureGroup().addTo(window.map);
+
+
+  // Controls
+//Consider this option for too much tips
+var lessPerformance = false;
+// Redraw lines when map is moved
+if (lessPerformance){
+  window.map.on('movestart', function(e) {
+    // Clear svg object (maybe check a fifferent solution than jquary)
+    $("#linesContainer").empty();
+  });
+
+  window.map.on('moveend', function(e) {
+    //  console.log("end")
+    drawLines_MapPerspective()
+  });
+}
+else{
+  map.on('move', function(e) {
+    //  console.log("end")
+    drawLines_MapPerspective()
+  });
+
+}
+
+// To avoid flickery, just remove lines when zoom starts
+window.map.on('zoomstart', function(e) {
+    //  console.log("end")
+    // drawLines_MapPerspective()
+    $("#linesContainer").empty();
+  });
+
+}
+
+
+
+
+function drawMarkers(csvSource){
+try{
+// Get csv from textarea
+// csvString = document.getElementById("csvSource").value.trim()
+csvString = csvSource.trim()
+csvString = csvString.replace(/\n\s*\n/g, '\n');
+markersJSONString = csv2json(csvString)
+
+// Add markers to map
+window.fg.clearLayers();
+
+
+
+
+for ( var i=0; i < markersJSONString.length; ++i ) 
+{
+
+  if (markersJSONString[i].cssColor != undefined){
+    colorMarker = markersJSONString[i].cssColor
+  }else{
+    colorMarker = "black"
+  }
+
+     L.circleMarker( [markersJSONString[i].lat, markersJSONString[i].lng], {color:colorMarker, opacity: 1.0, fillOpacity: 1.0, weight: 2, radius: 3})
+      .bindPopup( markersJSONString[i].name)
+      .addTo(window.fg);
+}
+}
+catch(error){
+  console.log("Error: drawMarkers failed")
+}
+}
+
+
+
+
+function drawTree(newickSource){
+//Tree plot example
+
+//Show attribution of Phylotree
+document.getElementById("attributionPhylotree").style.visibility = "visible";
+
+  // Clear tree before plot again
+// $("#svg").empty();
+// Define size
+var height = window.innerHeight*0.96, width = window.innerWidth*0.26;
+
+
+// Define tree object and set some parameters
+window.tree = d3.layout.phylotree()
+  .svg(d3.select("#svg"))
+  .options({
+    'left-right-spacing': 'fit-to-size',
+    // fit to given size top-to-bottom
+    'top-bottom-spacing': 'fit-to-size',
+    // fit to given size left-to-right
+    'selectable': false,
+    // make nodes and branches not selectable
+    'collapsible': false,
+    // turn off the menu on internal nodes
+    'transitions': false,
+    // turn off d3 animations
+    'show-scale': false,
+    // (Boolean) Determines whether or not scale bar for branch lengths is shown.
+    'align-tips': true,
+    // (Boolean) Determines whether tip names are aligned or not. Defaults to false.
+    'zoom': false,
+    // (Boolean) Determines whether or not zooming is enabled. Defaults to false.
+    'reroot': true,
+    "hide": false,
+    "label-nodes-with-name": true,
+    // Add id for every leaf
+  })
+  .size([height, width])
+  .node_circle_size(1); // do not show "circles" at internal nodes
+
+
+
+// Get newick string
+// newick = document.getElementById("newickSource").value
+
+// Plot tree
+tree(newickSource).layout(true);
+
+
+}
+
+
+// center view to show all markers an plot lines
+function centerView(){
+try{
+  // // Fit all markers after 1 second and draw lines
+setTimeout(function () {
+	window.map.fitBounds(window.fg.getBounds());
+  drawLines_MapPerspective()
+  markIncomplete()
+}, 1000);
+}
+catch(error){
+  console.log("Error: centerView failed")
+}
+}
+
+
+
+
+// Get inScreen coordinates of tree tips relative to container
+function inScreenLeaves(){
+  var obj = {}
+  // Get all nodes in the tree and filter only the tips (leaves)
+  var namesInTree = window.tree.get_nodes().filter(window.tree.is_leafnode)
+  for (x in namesInTree){
+    var nameNode = "node-" + namesInTree[x].name;
+    // Get size of text box for each tip
+    // var tipHeight = document.getElementById(nameNode).getBBox().height
+    // var tipWidth = document.getElementById(nameNode).getBBox().width
+
+
+    var el   = document.getElementById(nameNode); // or other selector like querySelector()
+    var rect = el.getBoundingClientRect(); // get the bounding rectangle
+
+
+    // Put in obj all information with corrections, width bbox of text and half height bbox of text
+    obj[namesInTree[x].name] = {"x": namesInTree[x].screen_x + (rect.width) + 10, "y": namesInTree[x].screen_y + (rect.height/1.5)}
+  }
+  return obj
+  //Return object with names and x y
+}
+
+
+
+
+// Get inScreen coordinates of map markers relative to container
+function inScreenMarkers(corrected=true){
+  var obj = {}
+  var markers = getFeaturesInView();
+  var leftOriginMap = document.getElementById("mapid").offsetLeft;
+  for (x in markers){
+    // console.log(markers[x]._popup._content + map.latLngToContainerPoint(markers[x]._latlng)) //object with lat long converted to 
+    var coord = window.map.latLngToContainerPoint(markers[x]._latlng)
+
+    var xArray = []
+    var yArray = []
+    //Check if there is more than one marker for a particular tip in the tree and add the x and y coords to the existent array
+    if (obj[markers[x]._popup._content] != undefined){
+      // var numMarkers = obj[markers[x]._popup._content].numMarkers + 1;
+      xArray = obj[markers[x]._popup._content].x
+      xArray.push(coord.x + leftOriginMap)
+      yArray = obj[markers[x]._popup._content].y
+      yArray.push(coord.y)
+    }else{ //If the object with the name of the tip does not exist, just add the first element to the x and y Arrays
+      // var numMarkers = 1
+      xArray.push(coord.x + leftOriginMap)
+      yArray.push(coord.y)
+    }
+
+    //If corrected is truee add the leaf position in screen of map container and put color if the property exist
+    // obj[markers[x]._popup._content] = {"x": (corrected) ?  coord.x + leftOriginMap : coord.x, "y": coord.y, "color": markers[x].options.color, "numMarkers":numMarkers}
+    obj[markers[x]._popup._content] = {"x": xArray, "y": yArray, "color": markers[x].options.color}
+
+  }
+  return obj
+  //Return object with names and x y
+}
+
+
+// Convert csv to json 
+function csv2json(csv){
+  try{
+  var lines=csv.split("\n");
+  var result = [];
+
+  //check if is 3 or 4 columns
+  if (lines[0].split(",").length > 3){
+    var headers=["name","lat","lng","cssColor"];
+  }else{
+    var headers=["name","lat","lng"];
+  }
+
+
+  for(var i=0;i<lines.length;i++){
+    var obj = {};
+    var currentline=lines[i].split(",");
+    //if some lat or long are not present exclude those points
+    if (currentline[1] != "" & currentline[2] != ""){
+      for(var j=0;j<headers.length;j++){
+        obj[headers[j]] = currentline[j].trim();
+      }
+      result.push(obj);
+    }
+  }
+  //return result; //JavaScript object
+  // return JSON.stringify(result); //JSON
+  return result
+  }
+  catch(error){
+    console.log("Error: cvs2json failed")
+  }
+}
+
+
+
+// Get all markers in the current boundary (view) in map
+function getFeaturesInView() {
+  var features = [];
+  window.map.eachLayer( function(layer) {
+    if(layer instanceof L.CircleMarker) {
+      if(window.map.getBounds().contains(layer.getLatLng())) {
+        features.push(layer);
+      }
+    }
+  });
+  return features;
+}
+
+
+
+// Call draw lines and mark those are not matching
+function drawLines_MapPerspective(){
+  // try{
+  // Clear svg object (maybe check a fifferent solution than jquery)
+  $("#linesContainer").empty();
+
+  var leaves = inScreenLeaves()
+  var markers = inScreenMarkers()
+
+    // Return intersection in leaves and markers
+  var commonList = Object.keys(markers).filter(value => Object.keys(leaves).includes(value))
+
+  // if (commonList.length > 0){
+  //   for (ele in commonList){
+  //       coord = {
+  //         "x1":leaves[commonList[ele]].x,
+  //         "y1":leaves[commonList[ele]].y,
+  //         "x2":markers[commonList[ele]].x,
+  //         "y2":markers[commonList[ele]].y
+  //         }
+  //       addLine(name,coord.x1,coord.y1,coord.x2,coord.y2,markers[commonList[ele]].color)
+  // }
+
+
+  if (commonList.length > 0){
+    for (ele in commonList){
+      //add line for every marker related with some tip in the tree, depends of the number of xs or ys defined by inScreenMarkers
+      for (numTips in markers[commonList[ele]].x){
+
+        coord = {
+          "x1":leaves[commonList[ele]].x,
+          "y1":leaves[commonList[ele]].y,
+          "x2":markers[commonList[ele]].x[numTips],
+          "y2":markers[commonList[ele]].y[numTips]
+          }
+        addLine(name,coord.x1,coord.y1,coord.x2,coord.y2,markers[commonList[ele]].color)
+  }
+  }
+
+}
+}
+
+//Mark those tips  that do not match 
+function markIncomplete(){
+  var leaves = inScreenLeaves()
+  var markers = inScreenMarkers()
+  var leavesUnique = Object.keys(leaves).filter((o) => Object.keys(markers).indexOf(o) === -1);
+  var markersUnique = Object.keys(markers).filter((o) => Object.keys(leaves).indexOf(o) === -1);
+
+  for (x in leavesUnique){
+  var nameNode = "node-" + leavesUnique[x]
+   document.getElementById(nameNode).style.textDecoration = "line-through"   
+  }
+
+  
+}
+
+//OLD METHOD THAT ONLY WORK WITH COMPLETE
+  // // Check if there is something in the object markers (aka markers in the map)
+  // if (Object.keys(markers).length > 0){
+
+  //   for (name in markers){
+  //       coord = {
+  //         "x1":leaves[name].x,
+  //         "y1":leaves[name].y,
+  //         "x2":markers[name].x,
+  //         "y2":markers[name].y
+  //         }
+  //       addLine(name,coord.x1,coord.y1,coord.x2,coord.y2)
+    
+  //   }
+  //   // return result
+    
+  //   // return console.log("added")
+  // }
+  // // return console.log("nothing to show")
+  // }
+  // catch{
+  //   console.log("Error: drawLines_MapPerspective failed")
+  // }
+
+
+// Draw lines in the linesContainer from tree tip to marker
+function addLine(id,x1,y1,x2,y2,stroke="Black",strokeWidth=1){
+  var newLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+  newLine.setAttribute('class','lines');
+  newLine.setAttribute('id',id);
+  newLine.setAttribute('x1',x1);
+  newLine.setAttribute('y1',y1);
+  newLine.setAttribute('x2',x2);
+  newLine.setAttribute('y2',y2);
+  newLine.setAttribute("stroke", stroke)
+  newLine.setAttribute("stroke-width", strokeWidth)
+
+  document.getElementById("linesContainer").appendChild(newLine);
+}
+
+
+
+
+
+// Control modal
+function openModal(){
+    removeUrlParameter("id")
+    document.getElementById("authorForm").reset(); 
+    document.getElementById("btnOnMapContainer").style.visibility = "hidden";
+    document.getElementById("myModal").style.display = "block";
+}
+
+
+function closeModal(newickSource=null,csvSource=null,xyzurl=null){
+  if (newickSource == null){
+      newickSource = document.getElementById("newickSource").value
+      p = newickSource;
+  }
+  if (csvSource == null){
+      csvSource = document.getElementById("csvSource").value
+  }
+  if (xyzurl == null){
+    xyzurl = document.getElementById("xyzURL").value
+  }
+
+
+  
+
+  if (newickSource != "" & csvSource != ""){
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
+    document.getElementById("myModal").style.display = "none";
+    drawMap(xyzurl); 
+    drawMarkers(csvSource); 
+    drawTree(newickSource);
+    centerView();
+    
+  }else{
+    window.alert("Nothing to show, enter newick tree and csv formated lat-long information to continue");
+  }
+}
+
+
+// Control reprinting tree useful for resizing
+function redrawTree(){
+  if(document.getElementById("myModal").style.display == "none"){
+    drawTree(p)
+    // drawLines_MapPerspective()
+    // markIncomplete()
+    setTimeout(function () {
+      drawLines_MapPerspective()
+      markIncomplete()
+    }, 1000);
+    
+}
+}
+
+//Listener for resizing screen
+window.addEventListener("resize", function(){
+  redrawTree()
+});
+
+
+window.addEventListener('beforeprint', function(){
+  switchVisibilityElements(false);
+  redrawTree()
+})
+
+
+
+//Examples
+function example(num){
+  newickSource = document.getElementById("newickSource")
+  csvSource = document.getElementById("csvSource")
+  var newick, latlong = "";
+  switch(num) {
+  case 1:
+  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)100:2)100:1)100;";
+  latlong = `Species A,18.231141, -97.196820
+Species B,18.365796, -97.355109
+Species C,18.875459, -97.793984
+Species D,18.721245, -99.240330
+Species E,18.250205, -99.543424`;
+    break;
+  case 2:
+  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)100:2)100:1)100;";
+  latlong = `Species A,18.231141, -97.196820,#ff0000
+Species B,18.365796, -97.355109,red
+Species C,18.875459, -97.793984,blue
+Species D,18.721245, -99.240330,#00f
+Species E,18.250205, -99.543424,SpringGreen`;
+    break;
+    case 3:
+  newick = "(('Species A':1,'Species B':1)90:3,('Species C':3,('Species D':1, 'Species E':1)100:2)100:1)100;";
+  latlong = `Species A,18.231141, -97.196820
+Species B,18.365796, -97.355109
+Species C,18.875459, -97.793984
+Species D,18.721245, -99.240330
+Species D,18.250205, -99.543424`;
+    break;
+  case 4:
+  newick = "[&r]('J. gossypiifolia MX':0.159019785,(('M. esculenta':0.03430991,'M. sp.1. MX':0.03108594)0.999989:0.0994623,((('C. maculatus (1) MX':0.01176578,'C. angustidens subsp. angustidens MX':0.014324)0.999656:0.00701156,('C. monicanus MX':0.00589713,'C. tepiquensis MX':0.0077436,('C. sinaloensis MX':2.7E-7,'C. elasticus MX':1.0E-8)0.976426:0.00603602)1.0:0.01748868,('C. egregius (1) MX':0.014511610000000001,('C. palmeri (1) MX':0.00682808,'C. shrevei (1) MX':0.0127819)1.0:0.0175596,('C. rotundifolius (1) MX':0.00472435,('C. aconitifolius subsp. aconitifolius (2) MX':0.010108879999999999,('C. albidus (2) MX':0.00342319,'C. tehuacanensis (2) MX':0.0031953499999999996,'C. liebmannii (1) MX':0.00316536)0.98866:0.00156583,'C. spinosus (1) MX':0.00169776,'C. tubulosus MX':9.1E-7,'C. multilobus subsp. multilobus MX':0.01150661,('C. nov eglandulatus MX':0.0016563,'C. tehuacanensis (1) MX':1.0E-7,('C. rostratus subsp. rostratus MX':1.0E-7,('C. albidus (1) MX':1.0E-8,('C. nov infiernidialis (1) MX':1.9E-7,'C. megacanthus (1) MX':0.00316794)1.0:0.011586299999999999)0.988678:0.0016301)0.988678:0.00163022)0.980293:0.0016305800000000002)0.796162:0.00817568)0.999994:0.00960022)0.999995:0.00728019)0.991784:0.01759684,(('C. acrandrus DO':0.08658456,(('C. adenochlamys BR':0.00794682,'C. urens (2) BR':0.00339589)0.977755:0.00305672,'C. urens (4) MX':0.014495000000000001,('C. urniger BR':0.0016562,'C. urens (1) BO':0.0031587300000000002,'C. urens (8) BR':0.00653656,('C. tenuifolius BO':0.0049587,'C. cajamarcensis BO':0.01067278)0.998265:0.00520463)0.994272:0.00153649)1.0:0.03011173)0.923747:0.01312455,('C. oligandrus BR':0.01437007,(('C. quercifolius (1) BR':0.03839955,('C. obtusifolius (2) BR':0.02007852,('C. hamosus BR':0.00720701,'C. populifolius (1) BR':0.00769521)0.922819:0.013233849999999998)0.996666:0.00872602)0.993383:0.01189059,(('C. hasslerianus (2) BR':0.002192,'C. maracayensis PY':0.0023380700000000003)0.766812:0.00386561,('C. beckii (1) BO':0.00763107,'C. cnicodendron BO':0.00581903)1.0:0.03126635,'C. albomaculatus (2) BR':0.025931589999999997,('C. ulei BR':0.00194061,'C. vitifolius (2) BR':0.00210711)0.84578:0.00970075)0.996501:0.01171626)0.996325:0.01052145)0.999991:0.01758535)0.927592:0.01187532)0.992064:0.05946124):0.159019785);";
+  latlong = `J. gossypiifolia MX,18.681297,-101.973580
+M. esculenta,-1.561118, -67.657992
+M. sp.1. MX,-11.201757, -40.514284
+C. maculatus (1) MX,24.067480, -110.181894
+C. angustidens subsp. angustidens MX,27.864942, -108.218861
+C. monicanus MX,19.700938, -104.351871
+C. tepiquensis MX,20.721479, -105.155178
+C. sinaloensis MX,23.269149, -106.109383
+C. elasticus MX,23.632450, -105.773590
+C. egregius (1) MX,18.216057, -97.185177
+C. palmeri (1) MX,25.281637, -110.729700
+C. shrevei (1) MX,24.661962, -103.242917
+C. rotundifolius (1) MX,26.494808, -100.234678
+C. aconitifolius subsp. aconitifolius (2) MX,20.810014, -89.714648
+C. albidus (2) MX,21.722320, -100.587182
+C. tehuacanensis (2) MX,18.321077, -97.185516
+C. liebmannii (1) MX,18.557963, -97.430613
+C. spinosus (1) MX,20.827496, -105.065450
+C. tubulosus MX,17.020199, -96.383094
+C. multilobus subsp. multilobus MX,19.627882, -96.890147
+C. nov eglandulatus MX,16.511801, -96.726705
+C. tehuacanensis (1) MX,18.300497, -97.279346
+C. rostratus subsp. rostratus MX,17.791227, -97.746221
+C. albidus (1) MX,21.212191, -99.452629
+C. nov infiernidialis (1) MX,18.734479, -101.690048
+C. megacanthus (1) MX,15.723471, -96.428295
+C. acrandrus DO,18.327013, -70.980384
+C. adenochlamys BR,-10.681487, -39.811044
+C. urens (2) BR,-10.956439, -38.747057
+C. urens (4) MX,15.727623, -96.550034
+C. urniger BR,-11.536114, -41.222618
+C. urens (1) BO,-15.085702, -68.234747
+C. urens (8) BR,-12.207551, -38.841317
+C. tenuifolius BO,-17.825377, -64.589590
+C. cajamarcensis BO,-21.900647, -63.549385
+C. oligandrus BR,-12.170667, -39.269389
+C. quercifolius (1) BR,-8.878996, -38.823298
+C. obtusifolius (2) BR,-11.243383, -41.933428
+C. hamosus BR,-9.462188, -38.116795
+C. populifolius (1) BR,-13.290519, -44.103514
+C. hasslerianus (2) BR,-19.780653, -54.896071
+C. maracayensis PY,-24.129216, -55.536986
+C. beckii (1) BO,-18.347149, -61.943664
+C. cnicodendron BO,-17.825053, -64.711435
+C. albomaculatus (2) BR,-13.710049, -47.462670
+C. ulei BR,-14.723504, -42.510595
+C. vitifolius (2) BR,-7.740784, -38.960459`;
+    break;
+  case 5:
+  newick = "(CAML_55:0.03002501,(((((((CAML_1:4.276406E-4,(CAML_114:0.001443409,CAML_117:0.001004847):0.002783129,CAML_116:6.081356E-4,(CAML_118:0.002926375,(((CAML_12:0.00104038,CAML_18:4.089298E-4,CAML_38:0.001599915,CAML_4:4.46339E-4,CAML_44:4.457301E-4,CAML_50:0.001060407):0.001037556,CAML_48:4.297398E-4,CAML_49:0.001052201):0.001719566,CAML_121:0.001065325,CAML_42:4.492334E-4):0.00106409,(CAML_27:0.001063314,CAML_40:0.00106066,CAML_41:4.335796E-4,CAML_9:4.232403E-4):0.001656501):9.92779E-4,CAML_15:4.178008E-4,CAML_22:0.001036489,CAML_23:4.35867E-4,CAML_3:0.00105558,CAML_30:0.001004657,CAML_31:4.406547E-4,CAML_47:0.001022236,CAML_68:4.509646E-4,CAML_8:5.810227E-4):0.002842149,(((CAML_11:6.937718E-4,CAML_19:6.092178E-4):0.002614933,CAML_21:4.347578E-4,CAML_24:0.001056313):0.00171098,CAML_125:0.002285596):0.001050798):0.003639817,(((CAML_10:0.002260375,((((((CAML_13:4.293888E-4,CAML_25:0.001066524):9.161603E-4,CAML_17:4.335609E-4):9.470983E-4,CAML_75:0.001631159):0.001118312,CAML_69:0.00134978):0.001338104,CAML_72:4.265862E-4,CAML_74:0.001033806,CAML_81:0.001547058):0.001783958,CAML_87:0.003330482):0.002804414,CAML_16:0.002938516,(CAML_2:8.882103E-4,CAML_26:0.001026782,(CAML_5:4.251328E-4,CAML_70:4.330876E-4):0.00102156,(CAML_63:6.990794E-4,CAML_86:0.001134544):0.001059191,CAML_71:4.224564E-4,CAML_85:0.001649691):0.003335783):0.001238778,CAML_32:0.002434564):0.002852503,CAML_29:0.005881684):0.002421499):8.196552E-4,(CAML_14:0.002605289,CAML_65:9.194277E-4):0.005728793,CAML_62:0.009695904):0.003632062,(CAML_64:0.004456276,CAML_7:0.003832268):0.005399093):0.01806623,(CAML_37:0.002295719,CAML_52:0.003143404):0.01792985):0.008517372,(CAML_103:7.772748E-4,CAML_108:0.001636196,CAML_128:0.001504829):0.02267193):0.01134899,((CAML_35:0.01293732,CAML_53:0.01155962):0.01472047,CAML_39:0.03940949):0.004570255);";
+    latlong = `CAML_133,,
+CAML_132,,
+CAML_131,,
+CAML_130,,
+CAML_129,,
+CAML_128,,
+CAML_127,,
+CAML_126,,
+CAML_125,29.090596,-113.268926
+CAML_124,,
+CAML_123,,
+CAML_122,,
+CAML_121,28.929333,-113.552383
+CAML_120,,
+CAML_119,,
+CAML_118,27.377383,-112.324483
+CAML_117,28.880533,-114.1362
+CAML_116,27.4959,-113.7741
+CAML_115,,
+CAML_114,26.899083,-113.768733
+CAML_113,27.4959,-113.7741
+CAML_112,27.43015,-114.047967
+CAML_111,,
+CAML_110,,
+CAML_109,,
+CAML_108,,
+CAML_107,,
+CAML_106,,
+CAML_105,,
+CAML_104,,
+CAML_103,,
+CAML_102,,
+CAML_101,,
+CAML_100,,
+CAML_99,,
+CAML_98,,
+CAML_97,,
+CAML_96,,
+CAML_95,,
+CAML_94,,
+CAML_93,,
+CAML_92,,
+CAML_91,,
+CAML_90,,
+CAML_89,,
+CAML_88,,
+CAML_87,23.764317,-110.00485
+CAML_86,23.727467,-109.791067
+CAML_85,23.37075,-109.762367
+CAML_84,,
+CAML_83,,
+CAML_82,,
+CAML_81,22.893467,-109.991133
+CAML_80,,
+CAML_79,,
+CAML_78,,
+CAML_77,,
+CAML_76,,
+CAML_75,23.3995,-110.1961
+CAML_74,23.42685,-110.213117
+CAML_73,23.57945,-110.215117
+CAML_72,23.57945,-110.215117
+CAML_71,23.878017,-110.2341
+CAML_70,23.878017,-110.2341
+CAML_69,24.0267,-110.296667
+CAML_68,25.666667,-110.783333
+CAML_67,,
+CAML_66,24.268301,-111.316589
+CAML_65,26.015751,-111.166
+CAML_64,24.507704,-110.382548
+CAML_63,24.15,-110.116667
+CAML_62,26.345243,-111.727271
+CAML_61,,
+CAML_60,,
+CAML_59,,
+CAML_58,,
+CAML_57,,
+CAML_56,,
+CAML_55,,
+CAML_54,,
+CAML_53,,
+CAML_52,,
+CAML_51,,
+CAML_50,33.2887,-116.172
+CAML_49,32.9225,-116.2228
+CAML_48,32.8329,-116.1802
+CAML_47,25.460806,-111.052667
+CAML_46,24.209167,-110.079444
+CAML_45,,
+CAML_44,33.1118,-116.3793
+CAML_43,,
+CAML_42,32.8376702,-117.1223503
+CAML_41,32.8544,-116.8838
+CAML_40,32.9761,-117.1175
+CAML_39,,
+CAML_38,33.668683,-115.912283
+CAML_37,,
+CAML_36,,
+CAML_35,,
+CAML_34,26.056389,-112.289167
+CAML_33,23.542041,-109.499914
+CAML_32,23.542041,-109.499914
+CAML_31,25.074444,-110.853056
+CAML_30,27.8375,-113.728056
+CAML_29,22.925194,-109.833139
+CAML_28,,
+CAML_27,34.419167,-118.594722
+CAML_26,23.089722,-109.629167
+CAML_25,23.403611,-110.204167
+CAML_24,28.876944,-110.748611
+CAML_23,25.706944,-111.049444
+CAML_22,26.54,-111.723889
+CAML_21,28.773333,-110.505
+CAML_20,,
+CAML_19,28.5675,-109.556944
+CAML_18,32.290278,-110.959722
+CAML_17,23.408889,-110.203333
+CAML_16,24.135556,-110.425278
+CAML_15,25.706944,-111.049444
+CAML_14,25.998889,-111.106111
+CAML_13,23.404722,-110.206389
+CAML_12,30.295278,-111.096667
+CAML_11,28.586389,-109.589722
+CAML_10,23.536667,-109.767222
+CAML_9,33.828117,-117.743583
+CAML_8,25.806667,-111.428333
+CAML_7,26.016944,-111.163056
+CAML_6,24.139167,-109.804338
+CAML_5,23.878056,-110.233889
+CAML_4,32.4475,-111.505833
+CAML_3,25.653056,-111.031944
+CAML_2,23.217917,-109.453611
+CAML_1,25.814167,-111.311944`;
+    break;
+  case 6:
+    newick="[&r]('E. micromera':0.012154063000000003,('E. arizonica':0.020225569,('E. p. carmenensis':0.009231360999999993,('E. p. johnstonii':0.009695904000000005,('E. p. hirtella':0.006976210999999996,('E. p. polycarpa':0.005881683999999998,('E. p. mejamia':0.002260374999999995,('E. p. intermixta':0.0033304819999999957,'E. p. genuflexa':0.003331016000000006):0.002804414000000005):0.004091281000000002):0.0024214989999999936):8.196552000000051E-4):0.0036320620000000053):0.018066230000000003):0.03282549800000001):0.0;"
+    latlong=`E. p. polycarpa,25.814167,-111.311944,Firebrick
+E. p. polycarpa,28.586389,-109.589722,Firebrick
+E. p. polycarpa,27.43015,-114.047967,Firebrick
+E. p. polycarpa,27.4959,-113.7741,Firebrick
+E. p. polycarpa,26.899083,-113.768733,Firebrick
+E. p. polycarpa,27.4959,-113.7741,Firebrick
+E. p. polycarpa,28.880533,-114.1362,Firebrick
+E. p. polycarpa,27.377383,-112.324483,Firebrick
+E. p. polycarpa,30.295278,-111.096667,Firebrick
+E. p. polycarpa,28.929333,-113.552383,Firebrick
+E. p. polycarpa,23.404722,-110.206389,Firebrick
+E. p. polycarpa,25.998889,-111.106111,Firebrick
+E. p. polycarpa,25.706944,-111.049444,Firebrick
+E. p. polycarpa,24.135556,-110.425278,Firebrick
+E. p. polycarpa,32.290278,-110.959722,Firebrick
+E. p. polycarpa,28.773333,-110.505,Firebrick
+E. p. polycarpa,26.54,-111.723889,Firebrick
+E. p. polycarpa,25.706944,-111.049444,Firebrick
+E. p. polycarpa,23.403611,-110.204167,Firebrick
+E. p. polycarpa,34.419167,-118.594722,Firebrick
+E. p. polycarpa,22.925194,-109.833139,Firebrick
+E. p. polycarpa,25.653056,-111.031944,Firebrick
+E. p. polycarpa,27.8375,-113.728056,Firebrick
+E. p. polycarpa,23.542041,-109.499914,Firebrick
+E. p. polycarpa,23.542041,-109.499914,Firebrick
+E. p. polycarpa,26.056389,-112.289167,Firebrick
+E. p. polycarpa,32.4475,-111.505833,Firebrick
+E. p. polycarpa,32.9761,-117.1175,Firebrick
+E. p. polycarpa,32.8544,-116.8838,Firebrick
+E. p. polycarpa,32.8376702,-117.1223503,Firebrick
+E. p. polycarpa,33.1118,-116.3793,Firebrick
+E. p. polycarpa,24.209167,-110.079444,Firebrick
+E. p. polycarpa,25.460806,-111.052667,Firebrick
+E. p. polycarpa,32.8329,-116.1802,Firebrick
+E. p. polycarpa,32.9225,-116.2228,Firebrick
+E. p. polycarpa,24.139167,-109.804338,Firebrick
+E. p. polycarpa,24.15,-110.116667,Firebrick
+E. p. polycarpa,24.268301,-111.316589,Firebrick
+E. p. polycarpa,24.0267,-110.296667,Firebrick
+E. p. polycarpa,23.57945,-110.215117,Firebrick
+E. p. polycarpa,23.57945,-110.215117,Firebrick
+E. p. polycarpa,23.42685,-110.213117,Firebrick
+E. p. polycarpa,23.3995,-110.1961,Firebrick
+E. p. polycarpa,23.727467,-109.791067,Firebrick
+E. p. polycarpa,33.828117,-117.743583,Firebrick
+E. arizonica,,,
+E. micromera,,,
+E. p. carmenensis,25.666667,-110.783333,ForestGreen
+E. p. carmenensis,26.015751,-111.166,ForestGreen
+E. p. carmenensis,24.507704,-110.382548,ForestGreen
+E. p. carmenensis,25.806667,-111.428333,ForestGreen
+E. p. carmenensis,26.016944,-111.163056,ForestGreen
+E. p. genuflexa,22.893467,-109.991133,Purple
+E. p. genuflexa,25.074444,-110.853056,Purple
+E. p. genuflexa,23.217917,-109.453611,Purple
+E. p. hirtella,29.090596,-113.268926,DarkKhaki
+E. p. hirtella,33.2887,-116.172,DarkKhaki
+E. p. hirtella,33.668683,-115.912283,DarkKhaki
+E. p. hirtella,28.5675,-109.556944,DarkKhaki
+E. p. intermixta,23.764317,-110.00485,DarkSlateGray
+E. p. intermixta,28.876944,-110.748611,DarkSlateGray
+E. p. johnstonii,26.345243,-111.727271,Black
+E. p. mejamia,23.37075,-109.762367,MediumBlue
+E. p. mejamia,23.878017,-110.2341,MediumBlue
+E. p. mejamia,23.878017,-110.2341,MediumBlue
+E. p. mejamia,23.089722,-109.629167,MediumBlue
+E. p. mejamia,23.408889,-110.203333,MediumBlue
+E. p. mejamia,23.536667,-109.767222,MediumBlue
+E. p. mejamia,23.878056,-110.233889,MediumBlue
+`
+    break;
+  default:
+  newick = "";
+  latlong = "";
+    
+}
+newickSource.value = newick;
+csvSource.value = latlong;
+if (!e){
+  var e = window.event
+  document.getElementById("exampleDescription").innerText = e.srcElement.title
+}
+
+}
+
+
+//For title
+function randomColor(){
+   return "#"+((1<<24)*Math.random()|0).toString(16); 
+}
+document.getElementById("title").style.textShadow = "-1px 0 " + randomColor() + ", 0 1px " + randomColor() + ", 1px 0 " + randomColor() + ", 0 -1px " + randomColor(); 
+document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor() + ", 0 0.5px " + randomColor() + ", 0.5px 0 " + randomColor() + ", 0 -0.5px " + randomColor(); 
+
+
+
+//Listeners for the tree
+// d3.select("svg").on("mouseout", drawLines_MapPerspective);
+// document.getElementById("svg").addEventListener("mouseout", drawLines_MapPerspective)
+
+// d3.select("#svg").on("mouseout", function() {
+//   console.log("test")
+// })
+
+// document.getElementById("d3_layout_phylotree_context_menu").addEventListener("mouseout", drawLines_MapPerspective);
+// document.querySelectorAll('il').forEach(item => {
+//   item.addEventListener('mouseout', event => {
+//     console.log("test")
+//   })
+// })
+
+
+//Drag and drop controlers from 
+var dropZones = [document.getElementById('newickSource'), document.getElementById('csvSource')];
+ 
+for (ele in dropZones){
+dropZones[ele].addEventListener('dragover', dragOver);
+dropZones[ele].addEventListener('dragend', dragEnd);
+dropZones[ele].addEventListener('drop', readText, false);
+}
+
+
+function dragOver(e) {
+    e.srcElement.value = "Drop here" 
+    return false;
+}
+
+function dragOver(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+    return false;
+}
+ 
+function dragEnd(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+    return false;
+}
+ 
+//Read file to put into the text area
+function readText(e) {
+    e.stopPropagation(); // for some browsers stop redirecting
+    e.preventDefault();
+ 
+    var file,
+        fileData,
+        fileReader,
+        files = e.dataTransfer.files;
+ 
+    if (!files) {
+        return;
+    }
+ 
+    //Clean textarea
+    e.srcElement.value = '';
+ 
+    //Just read first file in case user select more than one file
+    file = files[0];
+
+    //new instance for each file
+    fileReader = new FileReader();
+    fileReader.textArea = e.srcElement;
+
+    fileData = function (event) {
+        this.textArea.value += this.result
+    };
+
+    fileReader.addEventListener('loadend',fileData);
+    fileReader.readAsText(file);
+
+}
+
+
+
+
+// Listener for back button
+document.getElementById("btnBack").addEventListener('click', openModal);
+
+// Temporary solution for exporting. this hide the buttons for 30 seconds to take the screenshot
+document.getElementById("btnBack").addEventListener('contextmenu', function(ev) {
+    ev.preventDefault();
+    switchVisibilityElements(false)
+    
+}, false);
+
+
+
+//add container to put url with XYZ maps
+function addXYZcontainer(){
+document.getElementById("personalizedMapPrompt").innerText = "Tiled web map URL"
+document.getElementById("personalizedMapPrompt").style.paddingTop = "1em"
+document.getElementById("personalizedMapPrompt").style.fontStyle = "normal"
+document.getElementById("personalizedMapPrompt").style.fontWeight = "bold"
+document.getElementById("xyzURL").style.display = "block"
+document.getElementById("xyzURL").style.width = "100%"
+
+}
+
+
+// Hide controls and shadows or back to default state
+function switchVisibilityElements(isVisible, time=30000){
+    document.getElementById("btnBack").hidden = !isVisible;
+    document.getElementById("btnShare").hidden = !isVisible;
+    document.getElementsByClassName("leaflet-top leaflet-right")[0].hidden = !isVisible
+    document.getElementsByClassName("leaflet-control-zoom")[0].hidden = !isVisible
+
+    if (!isVisible){
+      document.getElementById("nameApp").style.textShadow = "none"; 
+      document.getElementById("nameApp").style.fontWeight = "bold"
+      setTimeout(switchVisibilityElements, time, true)
+    }
+      else{
+      document.getElementById("nameApp").style.textShadow = "-0.5px 0 " + randomColor() + ", 0 0.5px " + randomColor() + ", 0.5px 0 " + randomColor() + ", 0 -0.5px " + randomColor(); 
+      document.getElementById("nameApp").style.fontWeight = "normal"
+    }
+}
+
+
+var dbOperation = null;
+// var globalId = null;
+
+//Detect if URL has some urlsearch paremeter, if not open modal
+// function getURLParemeters(){
+//   if ('URLSearchParams' in window) {
+//     var searchParams = new URLSearchParams(window.location.search.slice(1))
+//     if(searchParams.has('id') === true & searchParams.get('id') != ""){
+//       // loadData(searchParams.get('id'))
+//       globalId = searchParams.get('id')
+//       dbOperation = "load"
+//       //Change button text Back for New
+//       // document.getElementById("btnBack").innerText = "New";
+//     }else{
+//       openModal()
+//     }
+
+// }else{//if browser is not capable also open modal
+//   openModal()
+//   window.alert("Your browser does not support this function")
+// }
+// }
+
+function getURLParemeters(name){
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has(name) === true & searchParams.get(name) != ""){
+      return searchParams.get(name)
+    }else{
+      return null
+    }
+}
+}
+
+function loadWebsite(){
+  if (getURLParemeters("id")){
+    dbOperation = "load"
+    logInFireBase()
+  }else{
+    openModal()
+  }
+}
+
+
+</script>
+
+
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-analytics.js"></script> -->
+
+<script>
+//Share functionality starts here
+
+// Initialize Cloud Firestore through Firebase
+firebase.initializeApp({
+  apiKey: 'AIzaSyDYt-gk2PBj1R669o33mhtsi9KlT99j9pQ',
+  authDomain: 'https://camayal.info',
+  projectId: 'treetom-d6ecb'
+});
+
+
+//Set share button listener
+document.getElementById("btnShare").addEventListener('click', openShareModal);
+
+
+function openShareModal(){
+  document.getElementById("btnOnMapContainer").style.visibility = "hidden";
+  if (getURLParemeters('id')){
+    document.getElementById("shareURL").value = window.location;
+    document.getElementById("shareInfo").style.display = "block";
+    document.getElementById("sharedWarning").style.display = "none";
+  }
+  else{
+    document.getElementById("shareInfo").style.display = "none";
+    document.getElementById("sharedWarning").style.display = "block";
+  }
+  document.getElementById("shareModal").style.display = "block";
+}
+
+
+var closeBtns = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+  closeBtns.onclick = function() {
+    document.getElementById("btnOnMapContainer").style.visibility = "visible";  
+    document.getElementById("shareModal").style.display = "none";
+}
+
+
+
+var db = firebase.firestore();
+
+
+function logInFireBase(){
+//anonymous autorization
+firebase.auth().signInAnonymously().catch(function(error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // ...
+});
+}
+
+
+//detect anonymous info login
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    
+    // User is signed in. Show share button, if not something happen
+    // var uid = user.uid;
+    // getURLParemeters()
+    if (dbOperation == "load"){
+      loadData(getURLParemeters("id"))
+      dbOperation = null
+    }
+    if(dbOperation == "save"){
+      saveData()
+      dbOperation = null
+    }
+  } 
+  // else {
+  //   // User is signed out. or never sign in not show share button
+  //   // openModal()
+  //   // window.alert("Your browser does not support this function")
+  // }
+});
+
+
+//Launch save event checking if the user is logged or not
+function preSaveData(author=""){
+  //If a ID is in the url, abort saving process and show sharing modal
+  if (getURLParemeters('id')){
+    return
+  }
+  //Detect if an anonymous user is linked to this session, else create one
+  if (firebase.auth().currentUser){
+    saveData()
+  }else{
+    logInFireBase()
+    dbOperation = "save"
+  }
+
+
+
+
+  //Nested function
+  //Save data in database
+  function saveData(publicName=null, secretKey=null, author=""){
+    db.collection("userTreeMaps").add({
+      tree: document.getElementById("newickSource").value,
+      // gps: document.getElementById("csvSource").value,
+      gps: document.getElementById("csvSource").value.replace(/\n/g,'\\n'),
+      // center: "none",
+      // layer: "none",
+      customLayer: document.getElementById("xyzURL").value,
+      // secretKey: secretKey,
+      // publicName: publicName,
+      userID:firebase.auth().currentUser.uid,
+      author: document.getElementById("authorship").value,
+      year: document.getElementById("year").value,
+      doi: document.getElementById("doi").value,
+      email: document.getElementById("authorEmail").value, 
+  })
+  .then(function(docRef) {
+      // console.log("Document written with ID: ", docRef.id);
+      addUrlParameter("id", docRef.id)
+      //show shareURL container
+      document.getElementById("shareURL").value = window.location;
+      document.getElementById("shareInfo").style.display = "block";
+      document.getElementById("sharedWarning").style.display = "none";
+
+      
+  
+
+  })
+  .catch(function(error) {
+      console.error("Error adding document: ", error);
+      window.alert("Error saving tree and coordinates in the database")
+  });
+
+  }
+
+
+}
+
+
+var p = "";
+//Load data from Firebase
+function loadData(id){
+
+var docRef = db.collection("userTreeMaps").doc(id);
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        closeModal(data.tree, data.gps.replace(/\\n/g,"\n"), data.customLayer)
+        p = data.tree;
+        // document.getElementById("btnShare").style.visibility = "hidden";
+        document.getElementById("authorInformation").innerHTML = data.author + ' ' + data.year + ' ' + '<a target="_blank" href="'+data.doi+'">'+data.doi+'</a>'
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
+        // openModal()
+        // window.alert("Tree and coordinates associated with "+id+" are not available")
+        loadPremiumKey(id)
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
+
+}
+
+
+function loadPremiumKey(id){
+
+var docRef = db.collection("properNameKeys").doc(id);
+var result = "";
+
+docRef.get().then(function(doc) {
+    if (doc.exists) {
+        data = doc.data()
+        
+        loadData(data.id)
+    } else {
+        // doc.data() will be undefined in this case
+        // console.log("No such document!");
+        //if fails load open modal
+        openModal()
+        window.alert("Tree and coordinates associated with "+id+" are not available")
+    }
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+    openModal()
+});
+
+
+
+}
+
+
+
+//Modify the current URL to show the identificator
+function addUrlParameter(name, value) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search)
+    searchParams.set(name, value);
+    var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+    history.pushState(null, '', newRelativePathQuery);
+    document.getElementById("authorInformation").innerHTML = document.getElementById("authorship").value + ' ' + document.getElementById("year").value + ' ' + '<a target="_blank" href="'+document.getElementById("doi").value+'">'+document.getElementById("doi").value+'</a>'
+}else{
+  window.alert("Your browser does not support this function")
+}
+}
+
+function removeUrlParameter(name) {
+  if ('URLSearchParams' in window) {
+    var searchParams = new URLSearchParams(window.location.search.slice(1))
+    if(searchParams.has(name) === true){
+    searchParams.delete(name)
+    history.pushState(null, '', window.location.pathname);
+    // window.location = window.location.pathname
+    document.getElementById("authorInformation").innerHTML = ""
+    }
+}
+}
+
+window.addEventListener('popstate', (event) => {
+  console.log(event);
+});
+
+
+
+
+function copyToClipboard(text){
+ var pretext = document.getElementById("btnCopy").innerText
+navigator.clipboard.writeText(text).then(function() {
+  // console.log('Async: Copying to clipboard was successful!');
+  document.getElementById("btnCopy").style.minWidth =  document.getElementById("btnCopy").offsetWidth
+  document.getElementById("btnCopy").innerText = "Copied!"
+  setTimeout(function () {
+  document.getElementById("btnCopy").innerText = pretext
+}, 2000);
+}, function(err) {
+  // console.error('Async: Could not copy text: ', err);
+  document.getElementById("btnCopy").innerText = "Failed to copy, select and use Ctrl+C (or Cmd+C) instead"
+  document.getElementById("btnCopy").disabled = true;
+});
+}
+
+
+
+
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-56235798-1', 'auto');
+  ga('require', 'displayfeatures');
+  ga('send', 'pageview');
+</script>
+
+</body>
+</html>

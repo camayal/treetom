@@ -240,7 +240,6 @@ cursor:pointer;
 
 
 
-
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
@@ -604,27 +603,27 @@ var height = window.innerHeight*0.96, width = window.innerWidth*0.26;
 window.tree = d3.layout.phylotree()
   .svg(d3.select("#svg"))
   .options({
-    'left-right-spacing': 'fit-to-size',
     // fit to given size top-to-bottom
-    'top-bottom-spacing': 'fit-to-size',
+    'left-right-spacing': 'fit-to-size',
     // fit to given size left-to-right
-    'selectable': false,
+    'top-bottom-spacing': 'fit-to-size',
     // make nodes and branches not selectable
-    'collapsible': false,
+    'selectable': false,
     // turn off the menu on internal nodes
-    'transitions': false,
+    'collapsible': false,
     // turn off d3 animations
-    'show-scale': false,
+    'transitions': false,
     // (Boolean) Determines whether or not scale bar for branch lengths is shown.
-    'align-tips': true,
+    'show-scale': false,
     // (Boolean) Determines whether tip names are aligned or not. Defaults to false.
-    'zoom': false,
+    'align-tips': true,
     // (Boolean) Determines whether or not zooming is enabled. Defaults to false.
+    'zoom': true,
     'reroot': true,
     "hide": false,
-    "label-nodes-with-name": true,
     // Add id for every leaf
-    "internal-names": true
+    "label-nodes-with-name": true,
+    "internal-names": true,
   })
   .size([height, width])
   .style_nodes(nodeStyler)
@@ -645,7 +644,7 @@ tree(newickSource).layout(true);
 function nodeStyler(dom_element, node_object) {
 
   // Add internal values, names or support values
-  if (node_object.children && node_object.name != "root") {
+  if (node_object.children && node_object.name != "root" && node_object.name != "new_root") {
 
             dom_element.append("text")
               .classed("internal-name", true)
@@ -654,11 +653,9 @@ function nodeStyler(dom_element, node_object) {
               .attr("dy", ".3em")
               .attr("text-anchor", "start")
               .attr("alignment-baseline", "base")
-              .attr("font-size",shown_font_size+"px")
+              .attr("font-size",shown_font_size*0.75+"px")
               .attr("opacity","1")
-
           }
-
         }
 
 

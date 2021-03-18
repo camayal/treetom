@@ -1,3 +1,4 @@
-TreeToM: A simple tool for visualizing phylogenetic trees onto a map.
+# TreeToM
+## A simple tool for visualizing phylogenetic trees onto a map.
 
 Visualizing phylogenies in maps is a great opportunity to interpret results in a biogeographic space. Drawing phylogenies onto maps usually implies some coding experience with currently available tools; TreeToM is a web app that makes easy this process, using a simple web interface that allows users to drag and drop a file with Newick trees and a CSV file with latitude and longitude data. Additionally, this web app offers an interactive map that users can move to select or focus on some areas of interest for their subjects of study. Some predefine map styles are provided by default; however, users can use their tiled web map (also known as XYZ maps) to display different features, such as climatic variables, land-use changes, among others. TreeToM also provides an integrated function to share these trees and maps through an URL with other researchers. The use of this web app is free and available on https://camayal.info/wa/treetom/
